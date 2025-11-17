@@ -1,0 +1,67 @@
+// ---- Definición de pines y variables ----
+
+// El pin donde está conectado el LED (13)
+const int pinLed = 13;
+
+// El pin de entrada analógica donde está conectado el sensor(A0)
+const int pinSensor = A0;
+
+// Límite de temperatura en grados celsius para encender el LED (22)
+const float tempLimite = 22.0; 
+
+// Variable para almacenar el valor leído del sensor (0-1023)
+int lecturaSensor = 0; 
+
+// Variable para almacenar el voltaje calculado (de 0.0 a 5.0)
+float voltaje = 0.0;
+
+// Variable para almacenar la temperatura final en grados celsius
+float temperaturaC = 0.0; 
+
+
+// ---- Configuración ----
+
+void setup() {
+  // Define el pin 13 como un pin de SALIDA 
+  pinMode(pinLed, OUTPUT);
+  
+  // Abre el puerto serial y lo configura a 9600 bps 
+  Serial.begin(9600);
+}
+
+
+// ---- Función Bucle ----
+
+void loop() {
+  // 1. Lee el valor de la entrada A0 
+  lecturaSensor = analogRead(pinSensor);
+  
+  // 2. se convierte la lectura analógica (0-1023) a un valor de voltaje (0-5V).
+  //    Se usa 1024.0 para forzar una división con decimales (flotante).
+  //    (5V / 1024 pasos = 0.00488V por paso) 
+  voltaje = lecturaSensor * (5.0 / 1024.0);
+  
+  // 3. Se convierte el voltaje a grados Celsius.
+  //    El sensor TMP36 entrega 0,5V (500mV) a los 0°C y va varíando 10mV por cada grado.
+  //    Entonces la temperatura se calcula: Temp °C = (Voltaje - 0,5) * 100
+  temperaturaC = (voltaje - 0.5) * 100.0;
+  
+  // 4. Muestra el valor de la temperatura en el Monitor Serial 
+  Serial.print("Temperatura: ");
+  Serial.print(temperaturaC);
+  Serial.println(" C");
+  
+  // --- Lógica para el encendido del LED --- 
+  
+  // Compara la temperatura medida con el límite de 22°C
+  if (temperaturaC > tempLimite) {
+    // Si es MAYOR a 22°C, activa la salida digital 13 (enciende el LED)
+    digitalWrite(pinLed, HIGH);
+  } else {
+    // Si es MENOR o IGUAL a 22°C, desactiva la salida (apaga el LED)
+    digitalWrite(pinLed, LOW);
+  }
+  
+  // Agrega una pausa de 1 segundo (1000 ms) para que se pueda ver bien
+  delay(1000); 
+}
